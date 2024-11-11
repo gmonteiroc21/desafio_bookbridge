@@ -41,7 +41,7 @@ def get_book_genre(book_id, genres_df):
     else:
         return None 
 
-def user_genre_count():
+def user_genre_count(interactions_df, user_id):
     # 1. Filtra as interações do usuário
     user_interactions = interactions_df[interactions_df['user_id'] == user_id]
 
