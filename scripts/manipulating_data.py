@@ -8,7 +8,9 @@ def clean_empty_rows(df, coulumn):
 
 def select_books(file_path):
     df = pd.read_json(file_path, lines=True, nrows=200000) #limita em 200mil linhas
-    colunas_desejadas = ['book_id',  'authors' ,'title', 'average_rating','genres', 'ratings_count',
+
+    colunas_desejadas = ['book_id',  'authors' ,'title', 'average_rating', 'ratings_count',
+
               'num_pages', 'publication_year', 'text_reviews_count']
     books_df = df[colunas_desejadas]
     return books_df
