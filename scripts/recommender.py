@@ -1,3 +1,15 @@
+def time_range(books_df, book_id):
+    publication_year = int(books_df[books_df['book_id'] == book_id]['publication_year'].values[0])
+    if publication_year < 1970:
+        time_period_books_read = user_literary_age[user_literary_age['user_id'] == user_id]['70-'].values[0]
+    elif 1970 <= publication_year < 2000:
+        time_period_books_read = user_literary_age[user_literary_age['user_id'] == user_id]['70-00'].values[0]
+    elif 2000 <= publication_year:
+        time_period_books_read = user_literary_age[user_literary_age['user_id'] == user_id]['00+'].values[0]
+    else:
+        time_period_books_read = 0
+    return time_period_books_read
+
 def recommend_books(user_id, top_genre_per_user, genre_stats_df):
     user_genre = top_genre_per_user[top_genre_per_user['user_id'] == user_id]['favorite_genre'].iloc[0]
 
