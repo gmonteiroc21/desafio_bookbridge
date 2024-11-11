@@ -1,3 +1,5 @@
+import pandas as pd
+
 def calculate_user_literary_age(interactions_df, books_df):
     # Filtra as interações onde o livro foi lido
     interactions_read = interactions_df[interactions_df['is_read'] == 1]
