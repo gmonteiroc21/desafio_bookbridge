@@ -5,13 +5,28 @@ def genre_stats(genres_df, books_df):
     genres_df = genres_df.explode('genres')
     
     # Faz o merge entre os dataframes de gêneros e livros, mantendo apenas as colunas necessárias
-    genre_books_df = genres_df.merge(books_df[['book_id', 'average_rating']], on='book_id')
+    genre_books_df = genres_df.merge(books_df[['book_id', 'average_rating', 'ratings_count', 'title']], on='book_id')
     
-    # Agrupa por gênero e calcula a média de avaliação e a contagem de livros por gênero
+    # Converte 'ratings_count' para int, tratando valores não numéricos
+    genre_books_df['ratings_count'] = pd.to_numeric(genre_books_df['ratings_count'], errors='coerce').fillna(0).astype(int)
+
+    # Agrupa por gênero para calcular a média de avaliação e contagem de livros por gênero
     genre_stats_df = genre_books_df.groupby('genres').agg(
         average_rating=('average_rating', 'mean'),  # Média de avaliação por gênero
         book_count=('book_id', 'count')             # Contagem de livros por gênero
     ).reset_index()
+
+    # Filtra livros com pelo menos 10 avaliações
+    filtered_books = genre_books_df[genre_books_df['ratings_count'] >= 10]
+
+    # Identifica o livro com a melhor avaliação em cada gênero
+    best_books = filtered_books.loc[filtered_books.groupby('genres')['average_rating'].idxmax()][
+        ['genres', 'title', 'average_rating', 'ratings_count']
+    ]
+    best_books = best_books.rename(columns={'title': 'best_book_title', 'average_rating': 'best_book_rating', 'ratings_count': 'best_book_reviews'})
+
+    # Faz o merge do melhor livro com as estatísticas de gênero
+    genre_stats_df = genre_stats_df.merge(best_books, on='genres', how='left')
     
     # Ordena por média de avaliação, do maior para o menor
     genre_stats_df = genre_stats_df.sort_values(by='average_rating', ascending=False).reset_index(drop=True)
