@@ -29,21 +29,33 @@ def calculate_user_literary_age(interactions_df, books_df):
 
     return user_literary_age
 
-def user_preference(interactions_df, genres_df):
-    # Realizar o merge entre interações e gêneros para associar cada livro lido ao seu gênero
-    user_genre_interactions = interactions_df.merge(genres_df[['book_id', 'genres']], on='book_id', how='left')
+def calculate_top_genre_per_user(interactions_df, genres_df,books_df):
 
-    # Expandir os gêneros para garantir que cada gênero fique em uma linha separada
+    valid_books = interactions_df[(interactions_df['is_read'] == 1) & (interactions_df['book_id'].isin(books_df['book_id']))]
+
+    # Realizar o merge entre interações e gêneros para associar cada livro lido ao seu gênero
+    user_genre_interactions = valid_books.merge(genres_df[['book_id', 'genres']], on='book_id', how='left')
+
+    # Expandir os gêneros para que cada gênero fique em uma linha separada
     user_genre_interactions = user_genre_interactions.explode('genres')
 
-    # Contar as ocorrências de cada gênero para cada usuário
-    user_genre_count = user_genre_interactions.groupby(['user_id', 'genres']).size().reset_index(name='genre_count')
-    # Ordenar por 'user_id' e 'genre_count' para que o gênero mais lido apareça primeiro para cada usuário
-    top_genre_per_user = user_genre_count.sort_values(['user_id', 'genre_count'], ascending=[True, False])
+    # Remover duplicatas para que cada livro lido por gênero conte apenas uma vez por usuário
+    user_genre_interactions = user_genre_interactions.drop_duplicates(subset=['user_id', 'book_id', 'genres'])
 
-    # Remover duplicatas para manter apenas o gênero mais lido por cada usuário
+    # Contar a quantidade de livros lidos por cada usuário para cada gênero
+    user_genre_count = user_genre_interactions.groupby(['user_id', 'genres']).size().reset_index(name='genre_count')
+
+    # Calcular o total de livros lidos por cada usuário
+    total_books_read = user_genre_interactions.groupby('user_id')['book_id'].nunique().reset_index(name='total_books_read')
+
+    # Identificar o gênero mais lido para cada usuário
+    top_genre_per_user = user_genre_count.sort_values(['user_id', 'genre_count'], ascending=[True, False])
     top_genre_per_user = top_genre_per_user.drop_duplicates(subset='user_id', keep='first')
 
     # Renomear a coluna 'genres' para 'favorite_genre'
     top_genre_per_user = top_genre_per_user.rename(columns={'genres': 'favorite_genre'})
+
+    # Adicionar a coluna de quantidade total de livros lidos
+    top_genre_per_user = top_genre_per_user.merge(total_books_read, on='user_id', how='left')
+
     return top_genre_per_user

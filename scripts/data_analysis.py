@@ -1,6 +1,7 @@
 import pandas as pd
 
 def genre_stats(genres_df, books_df, unique_genres):
+    genres_df = genres_df[genres_df['book_id'].isin(books_df['book_id'])]
     # Expande os gêneros para que cada linha contenha apenas um gênero por livro
     genres_df = genres_df.explode('genres')
 

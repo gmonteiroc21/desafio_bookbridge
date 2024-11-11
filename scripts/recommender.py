@@ -55,6 +55,7 @@ def user_genre_count(interactions_df, user_id, genres_df, genre):
     # 2. Faz o merge com o dataframe de livros para obter o gênero de cada livro
     user_books = user_interactions.merge(genres_df[['book_id', 'genres']], on='book_id', how='left')
     user_books = user_books.explode('genres')
+    print(user_books)
 
     # 3. Filtra os livros que pertencem ao gênero fornecido
     genre_books = user_books[user_books['genres'].str.contains(genre, case=False, na=False)]
