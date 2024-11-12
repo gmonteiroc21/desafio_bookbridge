@@ -59,7 +59,7 @@ def get_book_genre(book_id, genres_df):
     else:
         return None 
 
-def user_genre_count(interactions_df, user_id, genres_df, genre):
+def user_genre_count(interactions_df, user_id, genres_df, genre, books_df):
     # Filtra as interações para livros lidos e do usuário especificado
     user_books = interactions_df[(interactions_df['is_read'] == 1) & 
                                  (interactions_df['user_id'] == user_id) & 
@@ -98,7 +98,7 @@ def calculate_affinity_score(total_books_read, genre_books_read, time_period_boo
     time_proportion = time_period_books_read / total_books_read if total_books_read else 0
 
     # Calcula a pontuação final com os pesos
-    affinity_score = (genre_proportion * genre_weight) + (time_proportion * time_weight)
+    affinity_score = ((genre_proportion * genre_weight) + (time_proportion * time_weight))/3
     
     # Normaliza a pontuação para que seja uma porcentagem
     affinity_score = min(max(affinity_score, 0), 1) * 100  # Garante que a pontuação seja entre 0 e 100
