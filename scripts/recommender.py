@@ -80,12 +80,14 @@ def user_genre_count(interactions_df, user_id, genres_df, genre, books_df):
     return genre_count
 
 def period_range(books_df, book_id, user_literary_age):
-    publication_year = int(books_df[books_df['book_id'] == book_id]['publication_year'].values[0])
-    if publication_year < 1970:
+    publication_year = books_df[books_df['book_id'] == book_id]['publication_year'].values[0]
+    if publication_year.isdigit() == False:
+        time_period_books_read = 0
+    elif int(publication_year) < 1970:
         time_period_books_read = user_literary_age['70-'].values[0]
-    elif 1970 <= publication_year < 2000:
+    elif 1970 <= int(publication_year) < 2000:
         time_period_books_read = user_literary_age['70-00'].values[0]
-    elif 2000 <= publication_year:
+    elif 2000 <= int(publication_year):
         time_period_books_read = user_literary_age['00+'].values[0]
     else:
         time_period_books_read = 0
