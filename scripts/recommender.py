@@ -60,21 +60,24 @@ def get_book_genre(book_id, genres_df):
         return None 
 
 def user_genre_count(interactions_df, user_id, genres_df, genre):
-    # 1. Filtra as interações do usuário
-    user_interactions = interactions_df[interactions_df['user_id'] == user_id]
+    # Filtra as interações para livros lidos e do usuário especificado
+    user_books = interactions_df[(interactions_df['is_read'] == 1) & 
+                                 (interactions_df['user_id'] == user_id) & 
+                                 (interactions_df['book_id'].isin(books_df['book_id']))]
 
-    # 2. Faz o merge com o dataframe de livros para obter o gênero de cada livro
-    user_books = user_interactions.merge(genres_df[['book_id', 'genres']], on='book_id', how='left')
-    user_books = user_books.explode('genres')
+    # Faz o merge entre interações e gêneros para associar cada livro ao seu gênero
+    user_genre_interactions = user_books.merge(genres_df[['book_id', 'genres']], on='book_id', how='left')
 
-    # 3. Filtra os livros que pertencem ao gênero fornecido
-    genre_books = user_books[user_books['genres'].str.contains(genre, case=False, na=False)]
+    # Expande os gêneros para que cada gênero fique em uma linha separada
+    user_genre_interactions = user_genre_interactions.explode('genres')
 
-    # 4. Conta quantos livros desse gênero o usuário avaliou (com 'is_reviewed' == 1)
-    reviewed_books = genre_books[genre_books['is_reviewed'] == 1]
+    # Filtra apenas as interações do gênero especificado
+    genre_interactions = user_genre_interactions[user_genre_interactions['genres'] == genre]
 
-    # 5. Retorna a contagem de livros avaliados
-    return reviewed_books.shape[0]
+    # Conta quantas vezes o usuário leu livros desse gênero
+    genre_count = genre_interactions.shape[0]
+
+    return genre_count
 
 def period_range(books_df, book_id, user_literary_age):
     publication_year = int(books_df[books_df['book_id'] == book_id]['publication_year'].values[0])
